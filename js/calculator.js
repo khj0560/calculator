@@ -12,23 +12,53 @@ window.onload = function(){
 
     //입력값 세팅
     var setNum = function(){
+        
+        var dataNum = this.getAttribute('data-num');
+
+        if(result.getAttribute('data-result') && !operator) {
+            oldNum = '';
+            theNum = '';
+            result.setAttribute('data-result', '');
+        }
         //입력값
-        if(!theNum) {
-            if(this.getAttribute('data-num')=='.') {
-                theNum = '0.'
-            }else {
-                theNum = this.getAttribute('data-num');
-            }
-        }else if(theNum) {
-            if(theNum == '0') {
-                theNum = (this.getAttribute('data-num')=='0') ? '0' : this.getAttribute('data-num');
-            }else{
-                theNum += this.getAttribute('data-num');    
-            }
-        };
+        switch (dataNum) {
+            case '.':
+                if(theNum == '0' || !theNum) {
+                    theNum = '0' + dataNum;
+                }else if(theNum.indexOf('.') > 0) {
+                    return;     
+                }else{
+                    theNum += dataNum;
+                }
+                break;
+            case 'change':
+                if(theNum=='0') {
+                    return;
+                }else if(theNum.charAt(0)=='-') {
+                    theNum = theNum.substring(1);
+                }else {
+                    theNum = '-' + theNum;
+                }
+                break;
+            case 'percent':
+                if(theNum != '0') {
+                    theNum = (theNum/100).toString();
+                }
+                
+                break;
+            default:
+                if(!theNum) {
+                    theNum = dataNum;
+                }else if(theNum) {
+                    theNum += dataNum;
+                };
+                theNum = (theNum.charAt(0)=='0' && theNum.charAt(1)!='.') ? theNum.substring(1) : theNum;
+        }    
+        
         //viewer에 입력값 세팅
         if(theNum) {
-            viewer.innerHTML = (theNum.indexOf('.')>0) ? theNum : theNum.replace(addexp, ',');
+            //viewer.innerHTML = (theNum.indexOf('.')>0) ? theNum : theNum.replace(addexp, ',');
+            view(theNum);
         }    
     };
 
@@ -59,50 +89,61 @@ window.onload = function(){
     var setResult = function(){
         var oldNumInt;
         var theNumInt;
-        
-        console.log('theNum : '+theNum);
-        console.log('oldNum : '+oldNum);
 
         if(theNum && oldNum) {
             oldNumInt = parseFloat(oldNum);
             theNumInt = parseFloat(theNum);
             switch (operator) {
-              case "plus":
-                resultNum = oldNumInt + theNumInt;
-                break;
+                case 'plus':
+                    resultNum = oldNumInt + theNumInt;
+                    break;
 
-              case "minus":
-                resultNum = oldNumInt - theNumInt;
-                break;
+                case 'minus':
+                    resultNum = oldNumInt - theNumInt;
+                    break;
 
-              case "times":
-                resultNum = oldNumInt * theNumInt;
-                break;
+                case 'times':
+                    resultNum = oldNumInt * theNumInt;
+                    break;
 
-              case "divided by":
-                if(theNum == '0') {
-                    viewError();
-                    return;
-                }else {
-                    resultNum = oldNumInt / theNumInt;    
-                }  
-                break;
+                case 'divided-by':
+                    if(theNum == '0') {
+                        viewError();
+                        return;
+                    }else {
+                        resultNum = oldNumInt / theNumInt; 
+                    }  
+                    break;
             }
-            resultNum = resultNum.toString();
+            
+            if(!resultNum.toString().split('.')[1]){
+                resultNum = resultNum.toString();               
+            }else{
+                resultNum = resultNum.toFixed(8).toString();
+            }
+
             viewer.innerHTML = (resultNum.indexOf('.')>0) ? resultNum : resultNum.replace(addexp, ',');
+            result.setAttribute('data-result', resultNum);
             oldNum = resultNum;
             theNum = '';
-            
+            operator = '';
+            resultNum = '';
         }else{
             return;
         }
     };
+    
+    var view = function(str) {
+        
+        viewer.innerHTML = (str.indexOf('.')>0) ? str : str.replace(addexp, ',');
+    }
     
     var viewError = function() {
         viewer.innerHTML = 'Error';
         theNum = '';
         oldNum = '';
         resultNum = '';
+        result.setAttribute('data-result', '');
     }
     
     //클릭이벤트
