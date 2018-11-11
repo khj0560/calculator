@@ -26,7 +26,6 @@ body {
 .calculator {
     width: 450px;
     margin: 0 auto;
-    border: 10px solid black;
 }
 
 .calculator::after {
@@ -43,4 +42,10 @@ body {
     text-align: center;
     
     position: relative;
+}
+
+@media(max-width:420px){
+    .calculator {
+        width: 100%;
+    }
 }
